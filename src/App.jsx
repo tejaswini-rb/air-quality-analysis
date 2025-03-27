@@ -3,6 +3,7 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import D3Chart from './D3chart'
+import Dropdown from './dropdown'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -10,6 +11,7 @@ function App() {
   return (
     <>
       <h1>Map</h1>
+      <Dropdown />
       <D3Chart />
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
