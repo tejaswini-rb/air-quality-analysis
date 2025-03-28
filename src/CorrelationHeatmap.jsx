@@ -5,13 +5,13 @@ const CorrelationHeatmap = () => {
   const svgRef = useRef();
 
   useEffect(() => {
-    const width = 500; // hard code everything for now, will need to use actual data
+    const width = 500; // hard coded for now
     const height = 500;
     const margin = 50;
     const numRows = 5; 
     const numCols = 5;
 
-    // hardcoded from imageo on google doc - will need to use json reader to convert from python output 
+    // Hardcoded data; update as needed later
     const data = [
       [1, 0.34, 0.17, 0.15, 0.36],
       [0.34, 1, 0.37, 0.33, 0.51],
@@ -23,7 +23,8 @@ const CorrelationHeatmap = () => {
     const svg = d3
       .select(svgRef.current)
       .attr("width", width)
-      .attr("height", height);
+      .attr("height", height)
+      .style("font-family", "Oswald, sans-serif"); // Set Oswald font on the SVG container
 
     const colorScale = d3.scaleLinear()
       .domain([-1, 0, 1])
@@ -41,22 +42,23 @@ const CorrelationHeatmap = () => {
           .attr("fill", colorScale(value))
           .attr("stroke", "black");
 
-
         svg.append("text")
           .attr("x", j * cellSize + margin + cellSize / 2)
           .attr("y", i * cellSize + margin + cellSize / 2)
           .attr("text-anchor", "middle")
           .attr("dy", ".35em")
+          .attr("font-family", "Oswald, sans-serif")
           .text(value.toFixed(2))
           .attr("fill", "black");
       });
     });
-
   }, []);
 
   return (
     <div>
-      <h3>Correlation Heatmap</h3>
+      <h3 style={{ textAlign: "center", fontSize: "2em", marginBottom: "1em", marginLeft: "1.5em"}}>
+        Correlation Heatmap
+      </h3>
       <svg ref={svgRef}></svg>
     </div>
   );

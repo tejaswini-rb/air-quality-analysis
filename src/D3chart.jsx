@@ -34,7 +34,6 @@ const D3Chart = () => {
     console.log("Rendering Map with AQI Data:", aqiData);
 
     const width = 600, height = 500;
-
     const projection = d3.geoMercator().fitSize([width, height], geoData);
     const pathGenerator = d3.geoPath().projection(projection);
 
@@ -57,7 +56,7 @@ const D3Chart = () => {
       .attr("fill", (d) => {
         const stateName = d.properties.st_nm;
         const aqi = aqiData[stateName] || 50; // Default AQI if missing
-        console.log(`State: ${stateName}, AQI: ${aqi}`); // Debugging each state's AQI
+        console.log(`State: ${stateName}, AQI: ${aqi}`);
         return colorScale(aqi);
       })
       .attr("stroke", "#fff")
@@ -71,7 +70,7 @@ const D3Chart = () => {
 
   }, [geoData, aqiData]);
 
-  return <svg id="d3-container" style={{ border: "1px solid black" }} />;
+  return <svg id="d3-container" style={{ fontFamily: "Oswald" }} />;
 };
 
 export default D3Chart;

@@ -7,17 +7,16 @@ import Dropdown from './dropdown'
 import CorrelationHeatmap from './CorrelationHeatmap'
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <h1>Map</h1>
-      <Dropdown />
-      <D3Chart />
-      <CorrelationHeatmap />
-      
-    </>
-  )
-}
+    return (
+      <>
+        <h1>Air Quality Analysis</h1>
+        <Dropdown />
+        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-start' }}>
+          <D3Chart />
+          <CorrelationHeatmap />
+        </div>
+      </>
+    )
+  }
 
 export default App
