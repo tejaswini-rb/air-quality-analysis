@@ -5,6 +5,7 @@ import './App.css'
 import D3Chart from './D3chart'
 import Dropdown from './dropdown'
 import CorrelationHeatmap from './CorrelationHeatmap'
+import AQILineChart from './aqi_line'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -15,6 +16,7 @@ function App() {
       <Dropdown />
       <D3Chart />
       <CorrelationHeatmap />
+      <AQILineChart />
       
     </>
   )

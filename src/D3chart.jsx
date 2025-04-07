@@ -9,7 +9,7 @@ const D3Chart = () => {
     // Load GeoJSON data
     d3.json("/india.geojson")
       .then((data) => {
-        console.log("GeoJSON Data Loaded:", data);
+        //console.log("GeoJSON Data Loaded:", data);
         setGeoData(data);
       })
       .catch((error) => console.error("Error loading GeoJSON:", error));
@@ -17,12 +17,12 @@ const D3Chart = () => {
     // Load AQI CSV data
     d3.csv("/india_aqi_dummy.csv")
       .then((data) => {
-        console.log("Raw AQI CSV Data:", data);
+        //console.log("Raw AQI CSV Data:", data);
         const formattedData = data.reduce((acc, d) => {
           acc[d.State] = +d.AQI; // Convert AQI to a number
           return acc;
         }, {});
-        console.log("Formatted AQI Data:", formattedData);
+        //console.log("Formatted AQI Data:", formattedData);
         setAqiData(formattedData);
       })
       .catch((error) => console.error("Error loading AQI CSV:", error));
@@ -31,7 +31,7 @@ const D3Chart = () => {
   useEffect(() => {
     if (!geoData || !aqiData) return;
 
-    console.log("Rendering Map with AQI Data:", aqiData);
+    //console.log("Rendering Map with AQI Data:", aqiData);
 
     const width = 600, height = 500;
 
@@ -57,7 +57,7 @@ const D3Chart = () => {
       .attr("fill", (d) => {
         const stateName = d.properties.st_nm;
         const aqi = aqiData[stateName] || 50; // Default AQI if missing
-        console.log(`State: ${stateName}, AQI: ${aqi}`); // Debugging each state's AQI
+        //console.log(`State: ${stateName}, AQI: ${aqi}`); // Debugging each state's AQI
         return colorScale(aqi);
       })
       .attr("stroke", "#fff")
