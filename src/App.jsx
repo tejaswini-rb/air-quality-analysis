@@ -3,12 +3,16 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import D3Chart from './D3chart'
-import Dropdown from './dropdown'
+import DropdownYear from './DropdownYear'
+import DropdownMonth from './DropdownMonth'
 import CorrelationHeatmap from './CorrelationHeatmap'
 import AQILineChart from './aqi_line'
+import CityHeatmap from './CityHeatmap'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(0);
+  const [selectedYear, setSelectedYear] = useState(2015);
+  const [selectedMonth, setSelectedMonth] = useState("January");
 
   return (
     <>
@@ -17,8 +21,9 @@ function App() {
       <p>Our project approaches this problem through two main areas of focus. We have studied both statistical analysis of air quality data to identify trends across different factors, as well as forecasting future air quality based on current data.</p>
       <h2>Statistical Analysis</h2>
       <p>Update the year in the dropdown and interact with the heat map for more information</p>
-      <Dropdown />
-      <D3Chart />
+      <DropdownYear selectedYear={selectedYear} setSelectedYear={setSelectedYear} />
+      <DropdownMonth selectedMonth={selectedMonth} setSelectedMonth={setSelectedMonth}/>
+      <CityHeatmap selectedYear={selectedYear} selectedMonth={selectedMonth} />
       
       <AQILineChart />
 
