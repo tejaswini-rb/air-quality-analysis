@@ -8,6 +8,7 @@ import DropdownMonth from './DropdownMonth'
 import CorrelationHeatmap from './CorrelationHeatmap'
 import AQILineChart from './aqi_line'
 import CityHeatmap from './CityHeatmap'
+import MeanAQI from './MeanAQI'
 
 function App() {
   const [count, setCount] = useState(0);
@@ -20,13 +21,18 @@ function App() {
       <h2>About</h2>
       <p>Our project approaches this problem through two main areas of focus. We have studied both statistical analysis of air quality data to identify trends across different factors, as well as forecasting future air quality based on current data.</p>
       <h2>Statistical Analysis</h2>
+      <h3>Overall Trends</h3>
+      <CorrelationHeatmap />
+      <MeanAQI /> 
+      <h3>Monthly Trends</h3>
+
       <p>Update the year in the dropdown and interact with the heat map for more information</p>
       <DropdownYear selectedYear={selectedYear} setSelectedYear={setSelectedYear} />
       <DropdownMonth selectedMonth={selectedMonth} setSelectedMonth={setSelectedMonth}/>
       <CityHeatmap selectedYear={selectedYear} selectedMonth={selectedMonth} />
       
-      <AQILineChart />
-
+      <AQILineChart selectedYear={selectedYear} selectedMonth={selectedMonth}/>
+      
       <h2>Forecasting</h2>
       <p>We used various methods in order to attempt forecasting air quality. The results of each of the methods are shown below.</p>
       <h3>ARIMA Model</h3>

@@ -19,7 +19,7 @@ const CityHeatmap = ({ selectedYear, selectedMonth }) => {
     useEffect(() => {
         if (!geoData || !cityData) return; 
         
-        const width = 600, height = 500;
+        const width = 550, height = 400;
 
         const projection = d3.geoMercator().fitSize([width, height], geoData);
         const pathGenerator = d3.geoPath().projection(projection);
@@ -81,7 +81,7 @@ const CityHeatmap = ({ selectedYear, selectedMonth }) => {
 
       // Hardcode year and month for now
       const targetYear = 2019;
-      const targetMonth = new Date(`${selectedMonth} 1, 2000`).getMonth();
+      const targetMonth = new Date(`${selectedMonth} 1, 2015`).getMonth();
 
       // Filter & average AQI per city
       const cityAQIs = {};

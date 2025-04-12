@@ -1,53 +1,91 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 
-const AQILineChart = ({ selectedYear, selectedState }) => {
+const AQILineChart = ({ selectedYear, selectedMonth }) => {
+  console.log("AQL LIne received:", selectedYear, selectedMonth);
   const svgRef = useRef();
-
-  // hard coding data for now - AQi 
-  const dummyData = {
-    "Karnataka": {
-      "2022": {
-        rural: [80, 85, 82, 75, 70, 72, 74, 76, 79, 85, 87, 90],
-        urban: [110, 120, 115, 108, 100, 102, 105, 107, 109, 115, 120, 125],
-        suburban: [95, 100, 98, 92, 88, 90, 92, 93, 94, 97, 100, 102]
-      }
-
-    }
-  };
+  const [aqiData, setAqiData] = useState(null);
 
   useEffect(() => {
-    // comment this out once we get actual data
-    selectedState = "Karnataka"
-    selectedYear = "2022"
-    const data = dummyData[selectedState]?.[selectedYear];
-    if (!data) return;
+    d3.csv("/data/city_aqi_data.csv", d => {
+      const date = new Date(d.Date);
+      return {
+        ...d,
+        Date: date,
+        Month: date.getMonth(),
+        Year: date.getFullYear(),
+        AQI: +d.AQI,
+      };
+    }).then(data => {
+      setAqiData(data);
+    });
+  }, []);
 
-    const months = d3.range(12).map(i => new Date(2022, i, 1));
+  useEffect(() => {
+    if (!aqiData) return;
+
+    const monthIndex = new Date(`${selectedMonth} 1, 2022`).getMonth();
+
+    const filteredData = aqiData.filter(
+      d =>
+        d.Year === +selectedYear &&
+        d.Month === monthIndex &&
+        !isNaN(d.AQI) &&
+        ["rural", "urban", "suburban"].includes(d.Area_Classification?.toLowerCase())
+    );
+
+
+    const grouped = d3.groups(filteredData, d => d.Area_Classification.toLowerCase(), d => d.Date.toISOString().split("T")[0]);
+
+    const dailyAverages = {
+      rural: [],
+      urban: [],
+      suburban: []
+    };
+
+    grouped.forEach(([area, dates]) => {
+      const values = dates.map(([dateStr, entries]) => ({
+        date: new Date(dateStr),
+        avgAQI: d3.mean(entries, d => d.AQI)
+      })).sort((a, b) => a.date - b.date);
+
+      dailyAverages[area] = values;
+    });
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    const width = 600;
+    const width = 500;
     const height = 400;
-    const margin = { top: 40, right: 40, bottom: 40, left: 50 };
+    const margin = { top: 40, right: 40, bottom: 60, left: 50 };
+
+    const allDates = [
+      ...dailyAverages.rural,
+      ...dailyAverages.urban,
+      ...dailyAverages.suburban
+    ].map(d => d.date);
+
+    const allAQIs = [
+      ...dailyAverages.rural,
+      ...dailyAverages.urban,
+      ...dailyAverages.suburban
+    ].map(d => d.avgAQI);
+
+    if (allDates.length === 0 || allAQIs.length === 0) {
+      return;
+    }
 
     const xScale = d3.scaleTime()
-      .domain(d3.extent(months))
+      .domain(d3.extent(allDates))
       .range([margin.left, width - margin.right]);
 
-    const yMax = d3.max([
-      ...data.rural,
-      ...data.urban,
-      ...data.suburban
-    ]);
     const yScale = d3.scaleLinear()
-      .domain([0, yMax])
+      .domain([0, d3.max(allAQIs)])
       .range([height - margin.bottom, margin.top]);
 
     const line = d3.line()
-      .x((d, i) => xScale(months[i]))
-      .y(d => yScale(d));
+      .x(d => xScale(d.date))
+      .y(d => yScale(d.avgAQI));
 
     const colors = {
       rural: "#1f77b4",
@@ -57,41 +95,57 @@ const AQILineChart = ({ selectedYear, selectedState }) => {
 
     svg.append("g")
       .attr("transform", `translate(0,${height - margin.bottom})`)
-      .call(d3.axisBottom(xScale).ticks(12).tickFormat(d3.timeFormat("%b")));
+      .call(d3.axisBottom(xScale).ticks(6).tickFormat(d3.timeFormat("%d")));
 
     svg.append("g")
       .attr("transform", `translate(${margin.left},0)`)
       .call(d3.axisLeft(yScale));
 
     ["rural", "urban", "suburban"].forEach((type) => {
+      const data = dailyAverages[type];
+      if (data.length === 0) return;
+
       svg.append("path")
-        .datum(data[type])
+        .datum(data)
         .attr("fill", "none")
         .attr("stroke", colors[type])
         .attr("stroke-width", 2)
         .attr("d", line);
-
-      // Add labels
-      svg.append("text")
-        .attr("x", width - margin.right)
-        .attr("y", yScale(data[type][11]))
-        .attr("dy", "-0.5em")
-        .attr("text-anchor", "end")
-        .attr("fill", colors[type])
-        .style("font-size", "12px")
-        .text(type);
     });
+
+    // Title
     svg.append("text")
       .attr("x", width / 2)
       .attr("y", margin.top / 2)
       .attr("text-anchor", "middle")
       .style("font-size", "16px")
-      .text(`AQI Trends in ${selectedState} (${selectedYear})`);
+      .attr("fill", "white")
+      .text(`AQI Trends by Area Classification – ${selectedMonth} ${selectedYear}`);
 
-  }, [selectedState, selectedYear]);
+    // Legend
+    const legend = svg.append("g")
+      .attr("transform", `translate(${width / 2 - 100}, ${height - 30})`);
+
+    ["rural", "urban", "suburban"].forEach((type, i) => {
+      const legendRow = legend.append("g").attr("transform", `translate(${i * 100}, 0)`);
+
+      legendRow.append("rect")
+        .attr("width", 12)
+        .attr("height", 12)
+        .attr("fill", colors[type]);
+
+      legendRow.append("text")
+        .attr("x", 18)
+        .attr("y", 10)
+        .attr("fill", "white")
+        .style("font-size", "12px")
+        .text(type.charAt(0).toUpperCase() + type.slice(1));
+    });
+
+  }, [aqiData, selectedMonth, selectedYear]);
 
   return (
-    <svg ref={svgRef} width={600} height={400}></svg>
+    <svg ref={svgRef} width={700} height={400}></svg>
   );
 };
 
