@@ -9,11 +9,13 @@ import CorrelationHeatmap from './CorrelationHeatmap'
 import AQILineChart from './aqi_line'
 import CityHeatmap from './CityHeatmap'
 import MeanAQI from './MeanAQI'
+import StackedAreaChartCity from './StackedAreaChartCity.jsx'
 
 function App() {
-  const [count, setCount] = useState(0);
   const [selectedYear, setSelectedYear] = useState(2015);
   const [selectedMonth, setSelectedMonth] = useState("January");
+  const [selectedYearCity, setSelectedYearCity] = useState(2015);
+  const [selectedMonthCity, setSelectedMonthCity] = useState("January");
 
   return (
     <>
@@ -28,35 +30,37 @@ function App() {
 
       <p>Update the year in the dropdown and interact with the heat map for more information</p>
       <DropdownYear selectedYear={selectedYear} setSelectedYear={setSelectedYear} />
-      <DropdownMonth selectedMonth={selectedMonth} setSelectedMonth={setSelectedMonth}/>
+      <DropdownMonth selectedMonth={selectedMonth} setSelectedMonth={setSelectedMonth} />
       <CityHeatmap selectedYear={selectedYear} selectedMonth={selectedMonth} />
-      
+
       <AQILineChart selectedYear={selectedYear} selectedMonth={selectedMonth}/>
-      
+      <h2>City Day Stacked Area Chart</h2>
+      <p>
+        Daily aggregated air quality data (using city_day.csv) for the selected month and year
+      </p>
+      <div style={{ display: "flex", gap: "1rem" }}>
+        <DropdownYear selectedYear={selectedYearCity} setSelectedYear={setSelectedYearCity} />
+        <DropdownMonth selectedMonth={selectedMonthCity} setSelectedMonth={setSelectedMonthCity} />
+      </div>
+      <StackedAreaChartCity selectedYear={selectedYearCity} selectedMonth={selectedMonthCity} />
+
       <h2>Forecasting</h2>
       <p>We used various methods in order to attempt forecasting air quality. The results of each of the methods are shown below.</p>
       <h3>ARIMA Model</h3>
-
       <h3>Linear Regression</h3>
       <img src="/linear_regression.png" alt="Linear Regression" />
-      <p>Data: R-squared: 0.9217139055744
+      <p>Data: R-squared: 0.9217139055744<br />
       Mean Squared Error: 651.3567823009216</p>
       <h3>Logistic Regression</h3>
-      <img src="/logistic_regression.png" alt="Logistic Regression" />
-
+      <img src="/linear_regression.png" alt="Logistic Regression" />
       <h3>Random Forest</h3>
       <img src="/random_forest.png" alt="Random Forest" />
-
       <h3>SVM</h3>
       <img src="/svm.png" alt="SVM" />
-
       <h3>Sarima</h3>
-      <p>Still working on this one, could make it interactive possibly</p>
-
-      
-      
+      <p>TODO: Sarima</p>
     </>
   )
 }
 
-export default App
+export default App;
