@@ -14,14 +14,14 @@ const StackedAreaChartCity = ({ selectedYear, selectedMonth }) => {
 
     // Load the CSV from public/data/city_day.csv
     d3.csv("/data/city_day.csv")
-      .then((rawData) => {
+      .then(function(rawData) {
         console.log("City CSV loaded. Number of rows:", rawData.length);
         const parseDate = d3.timeParse("%Y-%m-%d");
         const targetMonth = new Date(`${selectedMonth} 1, 2000`).getMonth();
         console.log("Target month (number):", targetMonth);
         const grouped = {};
 
-        rawData.forEach((d) => {
+        rawData.forEach(function(d) {
           const date = parseDate(d.Date);
           if (!date) {
             console.warn("Invalid date format in row:", d);
@@ -31,7 +31,7 @@ const StackedAreaChartCity = ({ selectedYear, selectedMonth }) => {
             const dateKey = d3.timeFormat("%Y-%m-%d")(date);
             if (!grouped[dateKey]) {
               grouped[dateKey] = {
-                date,
+                date: date,
                 pm25: 0,
                 pm10: 0,
                 no2: 0,
@@ -49,28 +49,28 @@ const StackedAreaChartCity = ({ selectedYear, selectedMonth }) => {
           }
         });
 
-        const aggregatedData = Object.values(grouped).map((val) => ({
-          date: val.date,
-          pm25: val.count > 0 ? val.pm25 / val.count : 0,
-          pm10: val.count > 0 ? val.pm10 / val.count : 0,
-          no2:  val.count > 0 ? val.no2  / val.count : 0,
-          so2:  val.count > 0 ? val.so2  / val.count : 0,
-          o3:   val.count > 0 ? val.o3   / val.count : 0,
-        }));
+        const aggregatedData = Object.values(grouped).map(function(val) {
+          return {
+            date: val.date,
+            pm25: val.count > 0 ? val.pm25 / val.count : 0,
+            pm10: val.count > 0 ? val.pm10 / val.count : 0,
+            no2:  val.count > 0 ? val.no2  / val.count : 0,
+            so2:  val.count > 0 ? val.so2  / val.count : 0,
+            o3:   val.count > 0 ? val.o3   / val.count : 0,
+          };
+        });
 
-        aggregatedData.sort((a, b) => a.date - b.date);
+        aggregatedData.sort(function(a, b) { return a.date - b.date; });
         console.log("Aggregated City Data:", aggregatedData);
         setData(aggregatedData);
       })
-      .catch((error) => {
+      .catch(function(error) {
         console.error("Error loading City CSV:", error);
       });
   }, [selectedYear, selectedMonth]);
 
   useEffect(() => {
     if (!data) return;
-
-    console.log("StackedAreaChartCity drawing chart with data:", data);
     const svg = d3.select("#stacked-area-chart-city");
     const width = 600;
     const height = 400;
@@ -88,35 +88,67 @@ const StackedAreaChartCity = ({ selectedYear, selectedMonth }) => {
       return;
     }
 
+    // Set up keys and stack
     const keys = ["pm25", "pm10", "no2", "so2", "o3"];
     const stackedData = d3.stack().keys(keys)(data);
 
+    // Scales
     const xScale = d3.scaleTime()
-      .domain(d3.extent(data, (d) => d.date))
+      .domain(d3.extent(data, d => d.date))
       .range([margin.left, width - margin.right]);
 
     const yScale = d3.scaleLinear()
-      .domain([0, d3.max(stackedData, (layer) => d3.max(layer, (d) => d[1]))])
+      .domain([0, d3.max(stackedData, layer => d3.max(layer, d => d[1]))])
       .nice()
       .range([height - margin.bottom, margin.top]);
 
     const color = d3.scaleOrdinal()
       .domain(keys)
       .range(d3.schemeCategory10);
-
     const areaGen = d3.area()
-      .x((d) => xScale(d.data.date))
-      .y0((d) => yScale(d[0]))
-      .y1((d) => yScale(d[1]));
+      .x(d => xScale(d.data.date))
+      .y0(d => yScale(d[0]))
+      .y1(d => yScale(d[1]));
+    const tooltip = d3.select("body")
+      .append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0)
+      .style("position", "absolute")
+      .style("background-color", "rgba(0, 0, 0, 0.7)")
+      .style("color", "#fff")
+      .style("font-size", "11px")
+      .style("padding", "6px 8px")
+      .style("border-radius", "5px")
+      .style("pointer-events", "none")
+      .style("box-shadow", "0 2px 4px rgba(0,0,0,0.2)");
 
     svg.selectAll("path")
       .data(stackedData)
       .enter()
       .append("path")
-      .attr("fill", (d) => color(d.key))
+      .attr("fill", d => color(d.key))
       .attr("d", areaGen)
-      .append("title")
-      .text((d) => d.key);
+      // Mouse events for interactivity
+      .on("mouseover", function(event, d) {
+        d3.select(this)
+          .attr("fill", d3.color(color(d.key)).brighter(0.7));
+        tooltip
+          .style("opacity", 1)
+          .html(`Pollutant: ${d.key}`)
+          .style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 28) + "px");
+      })
+      .on("mousemove", function(event) {
+        tooltip
+          .style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 28) + "px");
+      })
+      .on("mouseout", function(event, d) {
+        d3.select(this)
+          .attr("fill", color(d.key));
+        tooltip
+          .style("opacity", 0);
+      });
 
     svg.append("g")
       .attr("transform", `translate(0, ${height - margin.bottom})`)
@@ -124,6 +156,10 @@ const StackedAreaChartCity = ({ selectedYear, selectedMonth }) => {
     svg.append("g")
       .attr("transform", `translate(${margin.left}, 0)`)
       .call(d3.axisLeft(yScale));
+
+    return () => {
+      tooltip.remove();
+    };
   }, [data]);
 
   return <svg id="stacked-area-chart-city"></svg>;
