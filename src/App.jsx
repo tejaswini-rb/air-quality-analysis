@@ -17,75 +17,21 @@ function App() {
   const [selectedYearCity, setSelectedYearCity] = useState(2015);
   const [selectedMonthCity, setSelectedMonthCity] = useState("January");
   const [activeSection, setActiveSection] = useState("Statistical Analysis");
-  const headerHeight = 120;
 
   return (
     <>
-      <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          backgroundColor: "#110015",
-          zIndex: 100,
-          padding: "20px 0",
-          boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-        }}
-      >
-        <h1
-          style={{ margin: "0 0 30px 0", textAlign: "center", color: "#fff" }}
-        >
-          Analyzing and Forecasting Air Quality in India
-        </h1>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "10px",
-            marginTop: "10px",
-          }}
-        >
-          <button
-            style={{
-              backgroundColor: "rgba(255,255,255,0.3)",
-              color: "#fff",
-              border: "1px solid #fff",
-              padding: "8px 12px",
-              cursor: "pointer",
-            }}
-            onClick={() => setActiveSection("Statistical Analysis")}
-          >
+      <div className="header">
+        <h1>Analyzing and Forecasting Air Quality in India</h1>
+        <div className="nav-buttons">
+          <button onClick={() => setActiveSection("Statistical Analysis")}>
             Statistical Analysis
           </button>
-          <button
-            style={{
-              backgroundColor: "rgba(255,255,255,0.3)",
-              color: "#fff",
-              border: "1px solid #fff",
-              padding: "8px 12px",
-              cursor: "pointer",
-            }}
-            onClick={() => setActiveSection("Models")}
-          >
-            Models
-          </button>
-          <button
-            style={{
-              backgroundColor: "rgba(255,255,255,0.3)",
-              color: "#fff",
-              border: "1px solid #fff",
-              padding: "8px 12px",
-              cursor: "pointer",
-            }}
-            onClick={() => setActiveSection("About")}
-          >
-            About
-          </button>
+          <button onClick={() => setActiveSection("Models")}>Models</button>
+          <button onClick={() => setActiveSection("About")}>About</button>
         </div>
       </div>
 
-      <div style={{ marginTop: `${headerHeight + 20}px` }}>
+      <div className="main-content">
         {activeSection === "Statistical Analysis" && (
           <div>
             <h2>Statistical Analysis</h2>
