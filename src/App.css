@@ -14,6 +14,11 @@ h1 {
   text-align: center;
 }
 
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #110015;
+  }  
+
 .logo {
   height: 6em;
   padding: 1.5em;

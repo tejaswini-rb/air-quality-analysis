@@ -12,7 +12,6 @@ const StackedAreaChartCity = ({ selectedYear, selectedMonth }) => {
       return;
     }
 
-    // Load the CSV from public/data/city_day.csv
     d3.csv("/data/city_day.csv")
       .then(function(rawData) {
         console.log("City CSV loaded. Number of rows:", rawData.length);
