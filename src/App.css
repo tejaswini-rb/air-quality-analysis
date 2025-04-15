@@ -5,7 +5,6 @@ body {
   background-color: #110015;
 }
 
-/* Root container */
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -13,26 +12,23 @@ body {
   text-align: center;
 }
 
-/* Fixed header styling */
 .header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  background-color: #000; /* Solid black background */
+  background-color: #110015;
   z-index: 100;
   padding: 20px 0;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-/* Header title */
 .header h1 {
   margin: 0 0 30px 0;
   text-align: center;
   color: #fff;
 }
 
-/* Navigation buttons container */
 .nav-buttons {
   display: flex;
   justify-content: center;
@@ -40,21 +36,20 @@ body {
   margin-top: 10px;
 }
 
-/* Navigation button style */
 .nav-buttons button {
-  background-color: rgba(255,255,255,0.3); /* Transparent white */
+  background-color: rgba(255,255,255,0.3);
   color: #fff;
   border: 1px solid #fff;
   padding: 8px 12px;
   cursor: pointer;
 }
 
-/* Main content container; adjust top margin to avoid header overlap */
+
 .main-content {
-  margin-top: 140px; /* header height (approx 120px) + extra spacing */
+  margin-top: 140px;
 }
 
-/* Preserve existing CSS */
+
 h1 {
   font-family: 'Playfair Display', serif;
 }
