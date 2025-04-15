@@ -31,6 +31,8 @@ function App() {
       <p>Update the year in the dropdown and interact with the heat map for more information</p>
       <DropdownYear selectedYear={selectedYear} setSelectedYear={setSelectedYear} />
       <DropdownMonth selectedMonth={selectedMonth} setSelectedMonth={setSelectedMonth} />
+
+      <h4>AQI Trends by Area Classification -  {selectedMonth}, {selectedYear}</h4>
       <CityHeatmap selectedYear={selectedYear} selectedMonth={selectedMonth} />
 
       <AQILineChart selectedYear={selectedYear} selectedMonth={selectedMonth}/>
