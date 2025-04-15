@@ -43,8 +43,27 @@ const CityHeatmap = ({ selectedYear, selectedMonth }) => {
     // Draw cities
     const colorScale = d3.scaleThreshold()
       .domain([100, 150, 200, 300, 400])
-      .range(["#ffffff", "#ffb3b3", "#ff6666", "#cc0000", "#660000"]);
+      .range(["#ffeeee", "#ffb3b3", "#ff6666", "#cc0000", "#660000"]);
 
+      const suburbanScale = d3.scaleThreshold()
+      .domain([100, 150, 200, 300, 400])
+      .range(["#ffedcc", "#ffcc99", "#ffb366", "#ff9933", "#ff7f0e"]);
+    
+    const ruralScale = d3.scaleThreshold()
+      .domain([100, 150, 200, 300, 400])
+      .range(["#c6dbef", "#9ecae1", "#6baed6", "#3182bd", "#1f77b4"]);
+    
+    const getFillColor = (d) => {
+        const classification = d.Classification?.toLowerCase();
+      
+        if (classification === "suburban") {
+          return suburbanScale(d.avgAQI);
+        } else if (classification === "rural") {
+          return ruralScale(d.avgAQI);
+        } else {
+          return colorScale(d.avgAQI); // fallback for urban/unknown
+        }
+      };
     svg.selectAll("circle")
       .data(cityData)
       .enter()
@@ -52,7 +71,7 @@ const CityHeatmap = ({ selectedYear, selectedMonth }) => {
       .attr("cx", (d) => projection([d.lon, d.lat])[0])
       .attr("cy", (d) => projection([d.lon, d.lat])[1])
       .attr("r", 6)
-      .attr("fill", (d) => colorScale(d.avgAQI))
+      .attr("fill", getFillColor)
       .attr("stroke", "#333")
       .attr("stroke-width", 0.5)
       .on("mouseover", function (event, d) {
@@ -60,7 +79,7 @@ const CityHeatmap = ({ selectedYear, selectedMonth }) => {
 
         d3.select("#tooltip")
           .style("visibility", "visible")
-          .html(`<strong>${d.city}</strong><br/>AQI: ${Math.round(d.avgAQI)}`);
+          .html(`<strong>${d.city}</strong><br/>AQI: ${Math.round(d.avgAQI)}<br/> Area Classification: ${d.Classification}`);
       })
       .on("mousemove", function (event) {
         d3.select("#tooltip")
@@ -92,7 +111,7 @@ const CityHeatmap = ({ selectedYear, selectedMonth }) => {
         if (date.getFullYear() === +selectedYear && date.getMonth() === targetMonth) {
           const city = d.City;
           if (!cityAQIs[city]) {
-            cityAQIs[city] = { sum: 0, count: 0, lat: +d.Latitude, lon: +d.Longitude };
+            cityAQIs[city] = { sum: 0, count: 0, lat: +d.Latitude, lon: +d.Longitude, Classification: d.Area_Classification };
           }
           cityAQIs[city].sum += +d.AQI;
           cityAQIs[city].count += 1;
@@ -104,6 +123,7 @@ const CityHeatmap = ({ selectedYear, selectedMonth }) => {
         avgAQI: val.sum / val.count,
         lat: val.lat,
         lon: val.lon,
+        Classification: val.Classification,
       }));
 
       setCityData(averaged);

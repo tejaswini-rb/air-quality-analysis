@@ -89,8 +89,8 @@ const AQILineChart = ({ selectedYear, selectedMonth }) => {
 
     const colors = {
       rural: "#1f77b4",
-      urban: "#ff7f0e",
-      suburban: "#2ca02c"
+      urban: "#660000",
+      suburban: "#ff7f0e"
     };
 
     svg.append("g")
@@ -120,7 +120,6 @@ const AQILineChart = ({ selectedYear, selectedMonth }) => {
       .attr("text-anchor", "middle")
       .style("font-size", "16px")
       .attr("fill", "white")
-      .text(`AQI Trends by Area Classification – ${selectedMonth} ${selectedYear}`);
 
     // Legend
     const legend = svg.append("g")
