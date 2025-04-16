@@ -10,6 +10,12 @@ import AQILineChart from "./aqi_line";
 import CityHeatmap from "./CityHeatmap";
 import MeanAQI from "./MeanAQI";
 import StackedAreaChartCity from "./StackedAreaChartCity.jsx";
+import LinReg from './LinReg';
+import HistoricalAQI from './historical_aqi';
+import ARIMA from './Arima';
+import XGBoost from './XGBoost';
+import SARIMA from './Sarima';
+import RandomForest from './RandomForest';
 
 function App() {
   const [selectedYear, setSelectedYear] = useState(2015);
@@ -126,22 +132,26 @@ function App() {
               We used various methods in order to attempt forecasting air
               quality. The results of each of the methods are shown below.
             </p>
-            <h3>ARIMA Model</h3>
-            <h3>Linear Regression</h3>
-            <img src="/linear_regression.png" alt="Linear Regression" />
-            <p>
-              Data: R-squared: 0.9217139055744
-              <br />
-              Mean Squared Error: 651.3567823009216
-            </p>
-            <h3>Logistic Regression</h3>
-            <img src="/linear_regression.png" alt="Logistic Regression" />
-            <h3>Random Forest</h3>
-            <img src="/random_forest.png" alt="Random Forest" />
-            <h3>SVM</h3>
-            <img src="/svm.png" alt="SVM" />
-            <h3>Sarima</h3>
-            <p>TODO: Sarima</p>
+            
+      <p>The following image is of historical AQI data for the city of Amaravati from December 2019 to July 2020</p>
+      
+      <HistoricalAQI />
+      
+      <p>Each of the following approaches were used to predict the last month of data (July 2020)</p>
+      <h3>ARIMA Model</h3>
+      <ARIMA />
+
+      <h3>ARIMAX</h3>
+      <SARIMA />
+
+      <h3>Linear Regression</h3>
+      <LinReg />
+      <h3>XGBoost</h3>
+      <XGBoost />
+      
+
+      <h3>Random Forest</h3>
+      <RandomForest />
           </div>
         )}
 
