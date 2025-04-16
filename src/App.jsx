@@ -148,10 +148,27 @@ function App() {
       <LinReg />
       <h3>XGBoost</h3>
       <XGBoost />
+
+            
       
 
       <h3>Random Forest</h3>
       <RandomForest />
+
+            <h2>Area Classifications</h2>
+      <p>We also explored factoring in the area classification (Urban, Suburban, Rural) into the prediction models:</p>
+
+
+      <h3>Urban: Bengaluru</h3>
+      <img src="/bengaluru.png" alt="Linear Regression" />
+
+      <h3>Subrban: Amaravati</h3>
+      <img src="/amaravati.png" alt="Linear Regression" />
+
+      
+      
+      <h3>Rural: Shillong</h3>
+      <img src="/shillong.png" alt="Linear Regression" />
           </div>
         )}
 
