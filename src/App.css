@@ -89,3 +89,33 @@ h1 {
 .read-the-docs {
   color: #888;
 }
+
+.dropdown {
+    display: inline-flex;
+    align-items: center;
+    margin: 0 0.5rem 1rem;
+    font-family: inherit;
+  }
+  
+  .dropdown-label {
+    margin-right: 0.4rem;
+    font-weight: 500;
+    color: #eee;
+  }
+  
+  .dropdown-select {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #666;
+    border-radius: 4px;
+    background-color: #222;
+    color: #fff;
+    font-size: 0.95rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  
+  .dropdown-select:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.3);
+  }
+  

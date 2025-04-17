@@ -1,13 +1,29 @@
 import React from "react";
 
 const DropdownMonth = ({ selectedMonth, setSelectedMonth }) => {
-  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]; // hard coded for now 
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
 
   return (
-    <div>
-      <label htmlFor="month-select">Select Month: </label>
+    <div className="dropdown">
+      <label className="dropdown-label" htmlFor="month-select">
+        Month:
+      </label>
       <select
         id="month-select"
+        className="dropdown-select"
         value={selectedMonth}
         onChange={(e) => setSelectedMonth(e.target.value)}
       >

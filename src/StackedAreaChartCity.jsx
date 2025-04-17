@@ -1,161 +1,155 @@
+// src/StackedAreaChartCity.jsx
 import { useEffect, useState } from "react";
 import * as d3 from "d3";
 
-const StackedAreaChartCity = ({ selectedYear, selectedMonth }) => {
-  console.log("StackedAreaChartCity mounted with:", selectedYear, selectedMonth);
+const StackedAreaChartCity = ({
+  selectedYear,
+  selectedMonth,
+  selectedCity,
+}) => {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    console.log("StackedAreaChartCity useEffect for CSV fetch triggered.");
-    if (!selectedYear || !selectedMonth) {
-      console.log("Missing selectedYear or selectedMonth");
-      return;
-    }
+    if (!selectedYear || !selectedMonth || selectedCity == null) return;
+    setData([]);
 
-    d3.csv("/data/city_day.csv")
-      .then(function(rawData) {
-        console.log("City CSV loaded. Number of rows:", rawData.length);
-        const parseDate = d3.timeParse("%Y-%m-%d");
-        const targetMonth = new Date(`${selectedMonth} 1, 2000`).getMonth();
-        console.log("Target month (number):", targetMonth);
-        const grouped = {};
+    d3.csv("/data/city_day.csv").then((rawData) => {
+      const parseDate = d3.timeParse("%Y-%m-%d");
+      const targetMonth = new Date(`${selectedMonth} 1, 2000`).getMonth();
+      const grouped = {};
 
-        rawData.forEach(function(d) {
-          const date = parseDate(d.Date);
-          if (!date) {
-            console.warn("Invalid date format in row:", d);
-            return;
+      rawData.forEach((d) => {
+        if (selectedCity !== "All" && d.City !== selectedCity) return;
+
+        const date = parseDate(d.Date);
+        if (!date) return;
+        if (
+          date.getFullYear() === +selectedYear &&
+          date.getMonth() === targetMonth
+        ) {
+          const key = d3.timeFormat("%Y-%m-%d")(date);
+          if (!grouped[key]) {
+            grouped[key] = {
+              date,
+              pm25: 0,
+              pm10: 0,
+              no2: 0,
+              so2: 0,
+              o3: 0,
+              count: 0,
+            };
           }
-          if (date.getFullYear() === +selectedYear && date.getMonth() === targetMonth) {
-            const dateKey = d3.timeFormat("%Y-%m-%d")(date);
-            if (!grouped[dateKey]) {
-              grouped[dateKey] = {
-                date: date,
-                pm25: 0,
-                pm10: 0,
-                no2: 0,
-                so2: 0,
-                o3: 0,
-                count: 0,
-              };
-            }
-            grouped[dateKey].pm25 += +d["PM2.5"] || 0;
-            grouped[dateKey].pm10 += +d["PM10"] || 0;
-            grouped[dateKey].no2  += +d["NO2"]  || 0;
-            grouped[dateKey].so2  += +d["SO2"]  || 0;
-            grouped[dateKey].o3   += +d["O3"]   || 0;
-            grouped[dateKey].count++;
-          }
-        });
-
-        const aggregatedData = Object.values(grouped).map(function(val) {
-          return {
-            date: val.date,
-            pm25: val.count > 0 ? val.pm25 / val.count : 0,
-            pm10: val.count > 0 ? val.pm10 / val.count : 0,
-            no2:  val.count > 0 ? val.no2  / val.count : 0,
-            so2:  val.count > 0 ? val.so2  / val.count : 0,
-            o3:   val.count > 0 ? val.o3   / val.count : 0,
-          };
-        });
-
-        aggregatedData.sort(function(a, b) { return a.date - b.date; });
-        console.log("Aggregated City Data:", aggregatedData);
-        setData(aggregatedData);
-      })
-      .catch(function(error) {
-        console.error("Error loading City CSV:", error);
+          grouped[key].pm25 += +d["PM2.5"] || 0;
+          grouped[key].pm10 += +d.PM10 || 0;
+          grouped[key].no2 += +d.NO2 || 0;
+          grouped[key].so2 += +d.SO2 || 0;
+          grouped[key].o3 += +d.O3 || 0;
+          grouped[key].count++;
+        }
       });
-  }, [selectedYear, selectedMonth]);
 
+      const aggregated = Object.values(grouped)
+        .map((v) => ({
+          date: v.date,
+          pm25: v.count ? v.pm25 / v.count : 0,
+          pm10: v.count ? v.pm10 / v.count : 0,
+          no2: v.count ? v.no2 / v.count : 0,
+          so2: v.count ? v.so2 / v.count : 0,
+          o3: v.count ? v.o3 / v.count : 0,
+        }))
+        .sort((a, b) => a.date - b.date);
+
+      setData(aggregated);
+    });
+  }, [selectedYear, selectedMonth, selectedCity]);
   useEffect(() => {
     if (!data) return;
-    const svg = d3.select("#stacked-area-chart-city");
-    const width = 600;
-    const height = 400;
-    const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+    const svg = d3
+      .select("#stacked-area-chart-city")
+      .attr("width", 600)
+      .attr("height", 400);
 
-    svg.attr("width", width).attr("height", height);
     svg.selectAll("*").remove();
+    d3.selectAll(".tooltip").remove();
 
     if (data.length === 0) {
-      svg.append("text")
-         .attr("x", width / 2)
-         .attr("y", height / 2)
-         .attr("text-anchor", "middle")
-         .text("No data available for the selected filters");
+      svg
+        .append("text")
+        .attr("x", 300)
+        .attr("y", 200)
+        .attr("text-anchor", "middle")
+        .text("No data for selected filters");
       return;
     }
 
-    // Set up keys and stack
+    const margin = { top: 20, right: 30, bottom: 30, left: 40 },
+      width = +svg.attr("width"),
+      height = +svg.attr("height");
     const keys = ["pm25", "pm10", "no2", "so2", "o3"];
-    const stackedData = d3.stack().keys(keys)(data);
-
-    // Scales
-    const xScale = d3.scaleTime()
-      .domain(d3.extent(data, d => d.date))
+    const stackData = d3.stack().keys(keys)(data);
+    const x = d3
+      .scaleTime()
+      .domain(d3.extent(data, (d) => d.date))
       .range([margin.left, width - margin.right]);
 
-    const yScale = d3.scaleLinear()
-      .domain([0, d3.max(stackedData, layer => d3.max(layer, d => d[1]))])
+    const y = d3
+      .scaleLinear()
+      .domain([0, d3.max(stackData, (layer) => d3.max(layer, (d) => d[1]))])
       .nice()
       .range([height - margin.bottom, margin.top]);
 
-    const color = d3.scaleOrdinal()
-      .domain(keys)
-      .range(d3.schemeCategory10);
-    const areaGen = d3.area()
-      .x(d => xScale(d.data.date))
-      .y0(d => yScale(d[0]))
-      .y1(d => yScale(d[1]));
-    const tooltip = d3.select("body")
+    const color = d3.scaleOrdinal().domain(keys).range(d3.schemeCategory10);
+
+    const areaGen = d3
+      .area()
+      .x((d) => x(d.data.date))
+      .y0((d) => y(d[0]))
+      .y1((d) => y(d[1]));
+    const tooltip = d3
+      .select("body")
       .append("div")
       .attr("class", "tooltip")
-      .style("opacity", 0)
       .style("position", "absolute")
-      .style("background-color", "rgba(0, 0, 0, 0.7)")
-      .style("color", "#fff")
-      .style("font-size", "11px")
-      .style("padding", "6px 8px")
-      .style("border-radius", "5px")
       .style("pointer-events", "none")
-      .style("box-shadow", "0 2px 4px rgba(0,0,0,0.2)");
-
-    svg.selectAll("path")
-      .data(stackedData)
+      .style("background", "rgba(0,0,0,0.7)")
+      .style("color", "#fff")
+      .style("padding", "6px 8px")
+      .style("border-radius", "4px")
+      .style("font-size", "12px")
+      .style("opacity", 0);
+    svg
+      .selectAll("path")
+      .data(stackData)
       .enter()
       .append("path")
-      .attr("fill", d => color(d.key))
+      .attr("fill", (d) => color(d.key))
       .attr("d", areaGen)
-      // Mouse events for interactivity
-      .on("mouseover", function(event, d) {
-        d3.select(this)
-          .attr("fill", d3.color(color(d.key)).brighter(0.7));
+      .on("mouseover", function (event, d) {
+        d3.select(this).attr("fill", d3.color(color(d.key)).brighter(0.7));
         tooltip
           .style("opacity", 1)
           .html(`Pollutant: ${d.key}`)
-          .style("left", (event.pageX + 10) + "px")
-          .style("top", (event.pageY - 28) + "px");
+          .style("left", event.pageX + 10 + "px")
+          .style("top", event.pageY - 25 + "px");
       })
-      .on("mousemove", function(event) {
+      .on("mousemove", function (event) {
         tooltip
-          .style("left", (event.pageX + 10) + "px")
-          .style("top", (event.pageY - 28) + "px");
+          .style("left", event.pageX + 10 + "px")
+          .style("top", event.pageY - 25 + "px");
       })
-      .on("mouseout", function(event, d) {
-        d3.select(this)
-          .attr("fill", color(d.key));
-        tooltip
-          .style("opacity", 0);
+      .on("mouseout", function (event, d) {
+        d3.select(this).attr("fill", color(d.key));
+        tooltip.style("opacity", 0);
       });
-
-    svg.append("g")
+    svg
+      .append("g")
       .attr("transform", `translate(0, ${height - margin.bottom})`)
-      .call(d3.axisBottom(xScale).ticks(5));
-    svg.append("g")
-      .attr("transform", `translate(${margin.left}, 0)`)
-      .call(d3.axisLeft(yScale));
+      .call(d3.axisBottom(x).ticks(5));
 
+    svg
+      .append("g")
+      .attr("transform", `translate(${margin.left}, 0)`)
+      .call(d3.axisLeft(y));
     return () => {
       tooltip.remove();
     };
